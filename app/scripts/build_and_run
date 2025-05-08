@@ -50,7 +50,15 @@ if [ $REBUILD -eq 1 ]; then
 		echo
 		cd $ROOT_DIR
 		# TEMP: --openssl-legacy-provider avoids a build error in pdf.js
-		NODE_OPTIONS=--openssl-legacy-provider npm run build
+    NODE_MAJOR_VERSION=$(node -v | sed -E 's/^v([0-9]+).*/\1/')
+    if [ "$NODE_MAJOR_VERSION" -lt 18 ]; then
+        echo "Node.js version is $NODE_MAJOR_VERSION — using legacy OpenSSL provider"
+        NODE_OPTIONS=--openssl-legacy-provider npm run build
+    else
+        echo "Node.js version is $NODE_MAJOR_VERSION — skipping legacy OpenSSL provider"
+        npm run build
+    fi
+
 		echo
 	fi
 	

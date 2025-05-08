@@ -48,7 +48,8 @@ async function getSass(source, options, signatures = {}) {
 					file: f,
 					outFile: dest,
 					sourceMap: true,
-					outputStyle: 'compressed'
+					outputStyle: 'compressed',
+          silenceDeprecations: true,
 				});
 
 				await fs.outputFile(dest, sass.css);
