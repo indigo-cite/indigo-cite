@@ -162,3 +162,10 @@ pref("media.utility-ffvpx.enabled", false);
 
 // Allow collectionTree scrolling when Control is highlighting collections on win
 pref("mousewheel.with_control.action", 1);
+
+pref("devtools.debugger.remote-enabled", true);
+pref("devtools.toolbox.host", "window"); // or "bottom"
+pref("devtools.browsertoolbox.panel", "inspector");
+pref("devtools.browsertoolbox.scope", "everything");
+pref("devtools.browsertoolbox.selectedTool", "inspector");
+pref("devtools.toolbox.selectedTool", "inspector");
