@@ -35,10 +35,12 @@
 					<html:div class="title">
 						<editable-text />
 					</html:div>
-					
+
 					<html:div class="creator-year"></html:div>
-					
+
 					<html:div class="bib-entry"></html:div>
+
+					<html:div class="indigo-citation"></html:div>
 				</html:div>
 
 				<html:div class="custom-head"></html:div>
@@ -69,6 +71,9 @@
 		}
 
 		init() {
+			// Load IndigoBook citation functionality
+			Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook.js", window);
+
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
 			this._prefsObserverIDs = [
 				Zotero.Prefs.registerObserver('itemPaneHeader', () => {
@@ -76,24 +81,27 @@
 				}),
 				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.style', () => this._forceRenderAll()),
 				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.locale', () => this._forceRenderAll()),
+				// Add a preference for IndigoBook display
+				Zotero.Prefs.registerObserver('itemPaneHeader.useIndigoBook', () => this._forceRenderAll()),
 			];
-			
+
 			this.title = this.querySelector('.title');
 			this.titleField = this.title.querySelector('editable-text');
 			this.creatorYear = this.querySelector('.creator-year');
 			this.bibEntry = this.querySelector('.bib-entry');
 			this.bibEntry.attachShadow({ mode: 'open' });
-			
+			this.indigoCitation = this.querySelector('.indigo-citation');
+
 			// Context menu for non-editable information (creator/year and bib entry)
 			this.secondaryPopup = this.querySelector('.secondary-popup');
 			this.secondaryPopup.firstElementChild.addEventListener('command', () => this._handleSecondaryCopy());
-			
+
 			this.creatorYear.addEventListener('contextmenu', (event) => {
 				if (this.item) {
 					this.secondaryPopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
 				}
 			});
-			
+
 			this.bibEntryContent = document.createElement('div');
 			this.bibEntryContent.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
 			this.bibEntryContent.addEventListener('click', (event) => {
@@ -108,19 +116,32 @@
 				}
 			});
 			this.bibEntry.shadowRoot.append(this.bibEntryContent);
-			
+
+			// Set up context menu for indigoCitation
+			this.indigoCitation.addEventListener('contextmenu', (event) => {
+				if (this.item) {
+					this.secondaryPopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
+				}
+			});
+
 			this.viewAsPopup = this.querySelector('.view-as-popup');
 			this.viewAsPopup.addEventListener('popupshowing', () => this._buildViewAsMenu(this.viewAsPopup));
-			
+
 			this._bibEntryCache = new LRUCache();
-			
+
+			// Set IndigoBook as default if pref doesn't exist yet
+			if (Zotero.Prefs.get('itemPaneHeader.useIndigoBook') === undefined) {
+				Zotero.Prefs.set('itemPaneHeader.useIndigoBook', true);
+			}
+
+			// Title field functionality - use existing functionality
 			this.titleField.addEventListener('blur', () => this.save());
 			this.titleField.ariaLabel = Zotero.getString('itemFields.title');
 			this.titleField.addEventListener('contextmenu', (event) => {
 				if (!this._item
 					// Attachment title field: Use default editable-text context menu
 					|| this._item.isAttachment()) return;
-				
+
 				event.preventDefault();
 				let menupopup = ZoteroPane.buildFieldTransformMenu({
 					target: this.titleField,
@@ -128,9 +149,9 @@
 						this._setTransformedValue(newValue);
 					},
 				});
-				
+
 				menupopup.append(document.createXULElement('menuseparator'));
-				
+
 				let viewAsMenu = document.createXULElement('menu');
 				viewAsMenu.setAttribute('data-l10n-id', 'item-pane-header-view-as');
 				viewAsMenu.setAttribute('type', 'menu');
@@ -138,7 +159,7 @@
 				this._buildViewAsMenu(viewAsPopup);
 				viewAsMenu.append(viewAsPopup);
 				menupopup.append(viewAsMenu);
-				
+
 				this.ownerDocument.querySelector('popupset').append(menupopup);
 				menupopup.addEventListener('popuphidden', () => menupopup.remove());
 				menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
@@ -195,14 +216,28 @@
 			}
 			if (this._isAlreadyRendered()) return;
 
+			// Hide all sections initially
+			this.title.hidden = true;
+			this.creatorYear.hidden = true;
+			this.bibEntry.hidden = true;
+			this.indigoCitation.hidden = true;
+
+			// Check if we should use IndigoBook
+			if (Zotero.Prefs.get('itemPaneHeader.useIndigoBook') === true &&
+				typeof Zotero_IndigoBook !== 'undefined' &&
+				!this._item.isAttachment() &&
+				!this._item.isNote()) {
+
+				// Render IndigoBook citation
+				this._renderIndigoBookCitation();
+				return;
+			}
+
+			// If not using IndigoBook, fall back to standard rendering
 			let headerMode = Zotero.Prefs.get('itemPaneHeader');
 			if (this._item.isAttachment()) {
 				headerMode = 'title';
 			}
-			
-			this.title.hidden = true;
-			this.creatorYear.hidden = true;
-			this.bibEntry.hidden = true;
 
 			if (headerMode === 'none') {
 				this.classList.add('no-title-head');
@@ -210,7 +245,7 @@
 			}
 
 			this.classList.remove('no-title-head');
-			
+
 			if (headerMode === 'bibEntry') {
 				if (!Zotero.Styles.initialized()) {
 					this.bibEntryContent.textContent = Zotero.getString('general.loading');
@@ -219,12 +254,12 @@
 					Zotero.Styles.init().then(() => this._forceRenderAll());
 					return;
 				}
-				
+
 				if (this._renderBibEntry()) {
 					this.bibEntry.hidden = false;
 					return;
 				}
-				
+
 				// Fall back to Title/Creator/Year if style is not found
 				headerMode = 'titleCreatorYear';
 			}
@@ -247,7 +282,7 @@
 				}
 				this.title.hidden = false;
 			}
-			
+
 			if (headerMode === 'titleCreatorYear') {
 				let firstCreator = this._item.getField('firstCreator');
 				let year = this._item.getField('year');
@@ -258,7 +293,7 @@
 				if (year) {
 					creatorYearString += ` (${year})`;
 				}
-				
+
 				if (creatorYearString) {
 					this.creatorYear.textContent = creatorYearString;
 					this.creatorYear.hidden = false;
@@ -271,6 +306,19 @@
 			// Make title field padding tighter if creator/year is visible below it
 			this.titleField.toggleAttribute('tight',
 				headerMode === 'titleCreatorYear' && !this.creatorYear.hidden);
+		}
+
+		// New method for rendering IndigoBook citations
+		_renderIndigoBookCitation() {
+			if (!this._item) return false;
+
+			// Make title read-only
+			this.titleField.readOnly = true;
+
+			// Generate the IndigoBook citation
+			this.indigoCitation.textContent = Zotero_IndigoBook.generateCitation(this._item);
+			this.indigoCitation.hidden = false;
+			return true;
 		}
 		
 		_renderBibEntry() {
@@ -334,6 +382,13 @@
 		}
 		
 		_handleSecondaryCopy() {
+			// Check if we're showing IndigoBook citation
+			if (!this.indigoCitation.hidden) {
+				Zotero.Utilities.Internal.copyTextToClipboard(this.indigoCitation.textContent);
+				return;
+			}
+
+			// Otherwise handle standard formats
 			let selectedMode = Zotero.Prefs.get('itemPaneHeader');
 			if (selectedMode === 'titleCreatorYear') {
 				Zotero.Utilities.Internal.copyTextToClipboard(this.creatorYear.textContent);
@@ -348,24 +403,38 @@
 				);
 			}
 		}
-		
+
 		_buildViewAsMenu(menupopup) {
 			menupopup.replaceChildren();
-			
+
+			// Add IndigoBook option
+			let useIndigoBook = Zotero.Prefs.get('itemPaneHeader.useIndigoBook');
+			let indigobookItem = document.createXULElement('menuitem');
+			indigobookItem.setAttribute('label', 'IndigoBook Citation');
+			indigobookItem.setAttribute('type', 'radio');
+			indigobookItem.setAttribute('checked', useIndigoBook === true);
+			indigobookItem.addEventListener('command', () => {
+				Zotero.Prefs.set('itemPaneHeader.useIndigoBook', true);
+			});
+			menupopup.append(indigobookItem);
+
+			// Add standard options
 			let selectedMode = Zotero.Prefs.get('itemPaneHeader');
 			for (let headerMode of ['title', 'titleCreatorYear', 'bibEntry']) {
 				let menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('data-l10n-id', 'item-pane-header-' + headerMode);
 				menuitem.setAttribute('type', 'radio');
-				menuitem.setAttribute('checked', headerMode === selectedMode);
+				menuitem.setAttribute('checked', !useIndigoBook && headerMode === selectedMode);
 				menuitem.addEventListener('command', () => {
+					// When selecting non-IndigoBook mode, disable IndigoBook
+					Zotero.Prefs.set('itemPaneHeader.useIndigoBook', false);
 					Zotero.Prefs.set('itemPaneHeader', headerMode);
 				});
 				menupopup.append(menuitem);
 			}
-			
+
 			menupopup.append(document.createXULElement('menuseparator'));
-			
+
 			let moreOptionsMenuitem = document.createXULElement('menuitem');
 			moreOptionsMenuitem.setAttribute('data-l10n-id', 'item-pane-header-more-options');
 			moreOptionsMenuitem.addEventListener('command', () => {
