@@ -64,7 +64,7 @@ var IndigoBookRules = (function (){
       },
       // 30.3 Journal Titles
       getJournalTitle: function(item) {
-        const journalTitle = item.getField('publicationTitle');
+        const journalTitle = item.getField('publicationTitle') || item.getField("proceedingsTitle");
         //Use the abbreviations for common institutional names as listed in Table T15 if the name is listed. If the institutional name is not listed in Table T15, use abbreviations as listed in Table T11 and Table T12. If the periodical title has an abbreviation in it, use the abbreviation. If the word is not found in any of these tables, do not abbreviate the word in the abbreviated title.
         const table11 = IndigoBookTables.table11;
         const table12 = IndigoBookTables.table12;

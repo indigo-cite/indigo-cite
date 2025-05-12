@@ -16,6 +16,7 @@ var Zotero_IndigoBook = {
 	 * @return {string} The IndigoBook citation as a string
 	 */
 	generateCitation: function(item) {
+    console.log(item);
     // rule 30:  Full Citation for Journals, Magazines & Newspaper Articles
     const rule30Types = [
       'journalArticle',
@@ -29,7 +30,7 @@ var Zotero_IndigoBook = {
     if (Zotero.ItemTypes.getName(item.getType()) === 'conferencePaper') {
       return IndigoBookRules.rule30.generateCitation(item);
     }
-    console.log(item, Zotero.ItemTypes.getName(item.getType()));
+    console.log(Zotero.ItemTypes.getName(item.getType()));
 		return `TODO (${item.getField('title')})`;
 	}
 };
