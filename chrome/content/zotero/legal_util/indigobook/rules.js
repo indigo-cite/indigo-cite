@@ -63,8 +63,7 @@ var IndigoBookRules = (function (){
         }
       },
       // 30.3 Journal Titles
-      getJournalTitle: function(item) {
-        const journalTitle = item.getField('publicationTitle') || item.getField("proceedingsTitle");
+      abbreviateJournalTitle: function(journalTitle) {
         //Use the abbreviations for common institutional names as listed in Table T15 if the name is listed. If the institutional name is not listed in Table T15, use abbreviations as listed in Table T11 and Table T12. If the periodical title has an abbreviation in it, use the abbreviation. If the word is not found in any of these tables, do not abbreviate the word in the abbreviated title.
         const table11 = IndigoBookTables.table11;
         const table12 = IndigoBookTables.table12;
@@ -109,16 +108,19 @@ var IndigoBookRules = (function (){
         }
         const articleTitle = item.getField('title');
         citation += `<i>${_quick_escape(articleTitle)}</i>, `;
+        const journalTitle = item.getField('publicationTitle') || item.getField("proceedingsTitle");
+        const journalName = IndigoBookRules.rule30.abbreviateJournalTitle(journalTitle);
         const volume = item.getField('volume');
-        if (volume) {
-          citation += `${_quick_escape(volume)} `;
-        }
-        const journalName = IndigoBookRules.rule30.getJournalTitle(item);
-        citation += `<span style="font-variant: small-caps;">${_quick_escape(journalName)}</span> `;
         //page number of first page of article cited. E.g., 123-145 is "123"
         const firstPage = item.getField('pages').split('-')[0];
-        if (firstPage) {
-          citation += `${_quick_escape(firstPage)} `;
+        if (journalName) {
+          if (volume) {
+            citation += `${_quick_escape(volume)} `;
+          }
+          citation += `<span style="font-variant: small-caps;">${_quick_escape(journalName)}</span> `;
+          if (firstPage) {
+            citation += `${_quick_escape(firstPage)} `;
+          }
         }
         //year of publication
         const year = item.getField('year');
@@ -126,12 +128,63 @@ var IndigoBookRules = (function (){
           citation += `(${_quick_escape(year)})`;
         }
         //url
-        const url = item.getField('url');
+        const url = item.getField('url').split("#")[0];
         if (url) {
           citation += `, ${_quick_escape(url)}`;
         }
         console.log('Citation:', citation);
         return citation.trim();
+      }
+    },
+
+    /**
+     * Rule 33: Basic Formula for Internet Sources
+     * Citations to Internet sources follow this form: <Author Name>, <Title of Website Page>, <italicized Main Website Title>, <pincite> <(Date source posted, with exact time of posting if available)>, <URL>.
+     */     
+    rule33: {
+      formatDate: function(date) {
+      	const monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+        const zdate = Zotero.Date.strToDate(date);
+        let dateString = '';
+        if (zdate.month) {
+          dateString += `${monthNames[zdate.month]} `;
+          if (zdate.day) {
+            dateString += `${zdate.day}, `;
+          }
+        }
+        if (zdate.year) {
+          dateString += `${zdate.year}`;
+        }
+      },
+      generateCitation: function(item) {
+        const publicationTitle = item.getField('publicationTitle') || item.getField('websiteTitle') || item.getField('blogTitle');
+        const publicationName = rule30.abbreviateJournalTitle(publicationTitle);
+        const title = item.getField('title');
+        const authors = IndigoBookRules.rule30.getAuthors(item);
+        const date = item.getField('date');
+        const dateString = IndigoBookRules.rule33.formatDate(date);
+        const url = item.getField('url').split("#")[0];
+        const dateAccessed = item.getField('accessDate');
+        const dateAccessedString = IndigoBookRules.rule33.formatDate(dateAccessed);
+        let citation = '';
+        if (authors) {
+          citation += `${_quick_escape(authors)}, `;
+        }
+        if (title) {
+          citation += `<i>${_quick_escape(title)}</i>, `;
+        }
+        if (publicationName) {
+          citation += `${_quick_escape(publicationName)}, `;
+        }
+        if (dateString) {
+          citation += `(${_quick_escape(dateString)})`;
+        }
+        if (url) {
+          citation += `, ${_quick_escape(url)}`;
+        }
+        if (dateAccessedString) {
+          citation += ` (last visited ${_quick_escape(dateAccessedString)})`;
+        }
       }
     }
   };
