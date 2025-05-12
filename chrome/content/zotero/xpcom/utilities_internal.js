@@ -70,7 +70,38 @@ Zotero.Utilities.Internal = {
 			.copyString(str);
 	},
 	
-	
+	/**
+    * Copy an element's formatted HTML text (italics, bold, smallcaps) to clipboard
+    */
+  copyFormattedCitation: function (element) {
+    const html = element.innerHTML;
+
+    // Create a temporary clipboard item
+    const clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
+      .getService(Components.interfaces.nsIClipboardHelper);
+
+    // If you want HTML copied (rich text, preserving formatting):
+    try {
+      // Advanced clipboard service for HTML copying
+      let trans = Components.classes["@mozilla.org/widget/transferable;1"]
+        .createInstance(Components.interfaces.nsITransferable);
+      trans.init(null);
+      trans.addDataFlavor("text/html");
+
+      let supportsString = Components.classes["@mozilla.org/supports-string;1"]
+        .createInstance(Components.interfaces.nsISupportsString);
+      supportsString.data = html;
+
+      trans.setTransferData("text/html", supportsString, html.length * 2);
+
+      let clipboard = Components.classes["@mozilla.org/widget/clipboard;1"]
+        .getService(Components.interfaces.nsIClipboard);
+      clipboard.setData(trans, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+    } catch (e) {
+      // Fall back to simple text copy if advanced copy fails
+      clipboardHelper.copyString(element.textContent);
+    }
+  },
 	/*
 	 * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
 	 *

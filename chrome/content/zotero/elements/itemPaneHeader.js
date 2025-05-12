@@ -316,8 +316,19 @@
 			this.titleField.readOnly = true;
 
 			// Generate the IndigoBook citation
-			this.indigoCitation.textContent = Zotero_IndigoBook.generateCitation(this._item);
 			this.indigoCitation.hidden = false;
+      const wrapper = document.createElement('span');
+      wrapper.innerHTML = Zotero_IndigoBook.generateCitation(this._item);
+
+      this.indigoCitation.innerHTML = '';
+      this.indigoCitation.appendChild(wrapper);
+
+      const copyButton = document.createElement('button');
+      copyButton.textContent = 'Copy';
+      copyButton.addEventListener('click', () => {
+        Zotero.Utilities.Internal.copyFormattedCitation(wrapper);
+      });
+      this.indigoCitation.appendChild(copyButton);
 			return true;
 		}
 		
