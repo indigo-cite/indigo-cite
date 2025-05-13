@@ -84,7 +84,11 @@ var IndigoBookRules = (function (){
       //url
       const url = item.getField('url').split("#")[0];
       if (url) {
-        citation += `, ${_quick_escape(url)}`;
+        if (url.startsWith("https://www.ssrn.com") && journalName.startsWith("SSRN")) {
+          // skip SSRN URLs
+        } else {
+          citation += `, ${_quick_escape(url)}`;
+        }
       }
       return citation.trim();
     },
@@ -108,15 +112,14 @@ var IndigoBookRules = (function (){
       }
       //R30.2.3 Multiple authors - For more than two authors, all authors may be listed with an ampersand before the last name; or all but the first may be omitted and replaced by “et al.” Indicate all authors when relevant the point being made, or when recognition of all authors is desirable.
       // STEIN MODIFICATION: if set, include the first {indigoBook.maxAuthors} authors.
-      console.log("Zotero is:", Zotero);
-      // const maxAuthors = Zotero.Prefs.get('indigoBook.maxAuthors');
-      // if (maxAuthors && maxAuthors > 0 && authors.length > maxAuthors) {
-      //   return `${authorNames.slice(0, maxAuthors).join(', ')}, et al.`;
-      // } else if (maxAuthors){
-      //   return authorNames.join(', ');
-      // } else {
-      //   return `${authorNames[0]} et al.`;  
-      // }
+      const maxAuthors = Zotero.Prefs.get('indigoBook.maxAuthors');
+      if (maxAuthors && maxAuthors > 0 && authors.length > maxAuthors) {
+        return `${authorNames.slice(0, maxAuthors).join(', ')}, et al.`;
+      } else if (maxAuthors){
+        return authorNames.join(', ');
+      } else {
+        return `${authorNames[0]} et al.`;  
+      }
 
       //R30.2.4 No Author Listed - When no author is listed at the beginning or end of the publication source, skip the author field and begin the citation with the publication’s title.
       if (authors.length === 0) {
