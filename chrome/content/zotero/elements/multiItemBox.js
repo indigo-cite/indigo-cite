@@ -317,11 +317,6 @@
       
       this._bulkEditorContainer.innerHTML = '';
       
-      // Create header
-      const header = document.createElement('h3');
-      header.textContent = 'Bulk Edit Items';
-      this._bulkEditorContainer.appendChild(header);
-      
       // Create sections container
       const sectionsContainer = document.createElement('div');
       sectionsContainer.className = 'bulk-edit-sections';
@@ -483,11 +478,6 @@
       const section = document.createElement('div');
       section.className = 'bulk-edit-section item-type-section';
       
-      // Section header
-      const header = document.createElement('h4');
-      header.textContent = 'Change Item Type';
-      section.appendChild(header);
-      
       // Item types of selected items
       const itemTypes = new Set(this.items.map(item => item.itemTypeID));
       const hasMultipleTypes = itemTypes.size > 1;
@@ -563,11 +553,6 @@
       const section = document.createElement('div');
       section.className = 'bulk-edit-section text-operations-section';
       
-      // Section header
-      const header = document.createElement('h4');
-      header.textContent = 'Text Operations';
-      section.appendChild(header);
-      
       // Operations container
       const operationsContainer = document.createElement('div');
       operationsContainer.className = 'text-operations-container';
@@ -575,13 +560,9 @@
       // Title case operation
       const titleCaseContainer = document.createElement('div');
       titleCaseContainer.className = 'operation-container';
-      
-      const titleCaseLabel = document.createElement('span');
-      titleCaseLabel.textContent = 'Convert ALL CAPS titles to Title Case';
-      titleCaseContainer.appendChild(titleCaseLabel);
-      
+            
       const titleCaseButton = document.createElement('button');
-      titleCaseButton.textContent = 'Apply';
+      titleCaseButton.textContent = 'Convert ALL CAPS titles to Title Case';
       titleCaseButton.className = 'zotero-button';
       titleCaseButton.addEventListener('click', () => {
         this._convertTitlesToTitleCase();
@@ -589,24 +570,6 @@
       
       titleCaseContainer.appendChild(titleCaseButton);
       operationsContainer.appendChild(titleCaseContainer);
-      
-      // Lowercase operation
-      const lowercaseContainer = document.createElement('div');
-      lowercaseContainer.className = 'operation-container';
-      
-      const lowercaseLabel = document.createElement('span');
-      lowercaseLabel.textContent = 'Convert titles to lowercase';
-      lowercaseContainer.appendChild(lowercaseLabel);
-      
-      const lowercaseButton = document.createElement('button');
-      lowercaseButton.textContent = 'Apply';
-      lowercaseButton.className = 'zotero-button';
-      lowercaseButton.addEventListener('click', () => {
-        this._convertTitlesToLowercase();
-      });
-      
-      lowercaseContainer.appendChild(lowercaseButton);
-      operationsContainer.appendChild(lowercaseContainer);
       
       section.appendChild(operationsContainer);
       container.appendChild(section);
