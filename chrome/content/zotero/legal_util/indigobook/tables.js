@@ -66,6 +66,7 @@ var IndigoBookTables = {
     "Commissioner": "Comm'r",
     "Committee": "Comm.",
     "Communication": "Commc'n",
+    "Communications": "Commc'ns",
     "Community": "Cmty.",
     "Company": "Co.",
     "Comparative": "Compar.",
