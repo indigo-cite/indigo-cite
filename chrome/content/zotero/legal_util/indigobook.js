@@ -8,7 +8,15 @@ var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs"
 
 Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook/rules.js", window);
 
-var Zotero_IndigoBook = {
+var ZoteroTypeToIndigoBookRule = {
+  "journalArticle": IndigoBookRules.rule30,
+  "conferencePaper": IndigoBookRules.rule30,
+  "magazineArticle": IndigoBookRules.rule30,
+  "newspaperArticle": IndigoBookRules.rule30,
+  // Add more mappings as needed
+};
+
+var IndigoBook = {
 	/**
 	 * Generate an IndigoBook citation for the given item
 	 * 
@@ -17,18 +25,9 @@ var Zotero_IndigoBook = {
 	 */
 	generateCitation: function(item) {
     console.log(item);
-    // rule 30:  Full Citation for Journals, Magazines & Newspaper Articles
-    const rule30Types = [
-      'journalArticle',
-      'conferencePaper',
-      'magazineArticle',
-      'newspaperArticle',
-    ];
-    if (rule30Types.indexOf(Zotero.ItemTypes.getName(item.getType()) ) !== -1) {
-      return IndigoBookRules.rule30.generateCitation(item);
-    }
-    if (Zotero.ItemTypes.getName(item.getType()) === 'conferencePaper') {
-      return IndigoBookRules.rule30.generateCitation(item);
+    const iBookRule = ZoteroTypeToIndigoBookRule[Zotero.ItemTypes.getName(item.getType())];
+    if (iBookRule) {
+      return iBookRule.generateCitation(item);
     }
     console.log(Zotero.ItemTypes.getName(item.getType()));
 		return `TODO (${item.getField('title')})`;

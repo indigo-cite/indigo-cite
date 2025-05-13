@@ -224,7 +224,7 @@
 
 			// Check if we should use IndigoBook
 			if (Zotero.Prefs.get('itemPaneHeader.useIndigoBook') === true &&
-				typeof Zotero_IndigoBook !== 'undefined' &&
+				typeof IndigoBook !== 'undefined' &&
 				!this._item.isAttachment() &&
 				!this._item.isNote()) {
 
@@ -318,7 +318,7 @@
 			// Generate the IndigoBook citation
 			this.indigoCitation.hidden = false;
       const wrapper = document.createElement('span');
-      wrapper.innerHTML = Zotero_IndigoBook.generateCitation(this._item);
+      wrapper.innerHTML = IndigoBook.generateCitation(this._item);
 
       this.indigoCitation.innerHTML = '';
       this.indigoCitation.appendChild(wrapper);

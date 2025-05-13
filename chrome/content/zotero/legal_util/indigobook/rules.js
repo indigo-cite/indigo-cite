@@ -22,12 +22,63 @@ var IndigoBookRules = (function (){
   return {
     
     /**
-    * Rule 30: Journal Article
-    * Generates a citation for a journal article in IndigoBook format
+    * Rule 30: Full Citation for Journals, Magazines & Newspaper Articles
     */
     rule30: {
-      // 30.1 journal citation
+      // 30.1 Journal Citation
+      // Citations to consecutively paginated journals (that is, journals in which page numbering is continued from the last issue) take the following form:
+      // <Author’s Name(s)>, <Designation of piece> <Italicized Title of the Article>, <volume number, if applicable> <Name of Publication, abbreviated> <page number of first page of article cited>, <pincite, if citing to specific point> <(year published)>.
+      // Follow Rule R30.2 below for author name rules and Rule R30.3 for abbreviating the name of the publication.
+      usedFields: [
+        'title',
+        'publicationTitle',
+        'proceedingsTitle',
+        'volume',
+        'pages',
+        'year',
+        'url',
+        'accessDate',
+      ],
+      generateCitation: function(item) {
+        let citation = '';
 
+        const authors = IndigoBookRules.rule30.getAuthors(item);
+        if (authors) {
+          citation += `${_quick_escape(authors)}, `;
+        }
+        const designation = _titleCase(item.getField('type'));
+        if (["Note", "Comment", "Book Report"].indexOf(designation) !== -1) {
+          citation += `${_quick_escape(designation)}, `;
+        }
+        const articleTitle = item.getField('title');
+        citation += `<i>${_quick_escape(articleTitle)}</i>, `;
+        const journalTitle = item.getField('publicationTitle') || item.getField("proceedingsTitle");
+        const journalName = IndigoBookRules.rule30.abbreviateJournalTitle(journalTitle);
+        const volume = item.getField('volume');
+        //page number of first page of article cited. E.g., 123-145 is "123"
+        const firstPage = item.getField('pages').split('-')[0];
+        if (journalName) {
+          if (volume) {
+            citation += `${_quick_escape(volume)} `;
+          }
+          citation += `<span style="font-variant: small-caps;">${_quick_escape(journalName)}</span> `;
+          if (firstPage) {
+            citation += `${_quick_escape(firstPage)} `;
+          }
+        }
+        //year of publication
+        const year = item.getField('year');
+        if (year) {
+          citation += `(${_quick_escape(year)})`;
+        }
+        //url
+        const url = item.getField('url').split("#")[0];
+        if (url) {
+          citation += `, ${_quick_escape(url)}`;
+        }
+        console.log('Citation:', citation);
+        return citation.trim();
+      },
       // 30.2 authors
       getAuthors: function(item) {
         const authors = item.getCreators();
@@ -92,49 +143,7 @@ var IndigoBookRules = (function (){
         abbreviatedTitle = abbreviatedTitle.replace(/:\s*.*$/, '');
         return abbreviatedTitle;      
       },
-      // 30.1 Journal Citation
-      // Citations to consecutively paginated journals (that is, journals in which page numbering is continued from the last issue) take the following form:
-      // <Author’s Name(s)>, <Designation of piece> <Italicized Title of the Article>, <volume number, if applicable> <Name of Publication, abbreviated> <page number of first page of article cited>, <pincite, if citing to specific point> <(year published)>.
-      generateCitation: function(item) {
-        let citation = '';
-
-        const authors = IndigoBookRules.rule30.getAuthors(item);
-        if (authors) {
-          citation += `${_quick_escape(authors)}, `;
-        }
-        const designation = _titleCase(item.getField('type'));
-        if (["Note", "Comment", "Book Report"].indexOf(designation) !== -1) {
-          citation += `${_quick_escape(designation)}, `;
-        }
-        const articleTitle = item.getField('title');
-        citation += `<i>${_quick_escape(articleTitle)}</i>, `;
-        const journalTitle = item.getField('publicationTitle') || item.getField("proceedingsTitle");
-        const journalName = IndigoBookRules.rule30.abbreviateJournalTitle(journalTitle);
-        const volume = item.getField('volume');
-        //page number of first page of article cited. E.g., 123-145 is "123"
-        const firstPage = item.getField('pages').split('-')[0];
-        if (journalName) {
-          if (volume) {
-            citation += `${_quick_escape(volume)} `;
-          }
-          citation += `<span style="font-variant: small-caps;">${_quick_escape(journalName)}</span> `;
-          if (firstPage) {
-            citation += `${_quick_escape(firstPage)} `;
-          }
-        }
-        //year of publication
-        const year = item.getField('year');
-        if (year) {
-          citation += `(${_quick_escape(year)})`;
-        }
-        //url
-        const url = item.getField('url').split("#")[0];
-        if (url) {
-          citation += `, ${_quick_escape(url)}`;
-        }
-        console.log('Citation:', citation);
-        return citation.trim();
-      }
+      
     },
 
     /**
