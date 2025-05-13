@@ -712,6 +712,12 @@
 			
 			this._creatorCount = 0;
 			var num = this.item.numCreators();
+			
+			// Add the full author list if we have creators
+			if (num > 0) {
+				this.addFullAuthorListRow();
+			}
+			
 			if (num > 0) {
 				// Limit number of creators display
 				var max = Math.min(num, this._initialVisibleCreators);
@@ -1343,6 +1349,70 @@
 			});
 			rowData.textContent = Zotero.getString('general.numMore', num);
 			
+			this.addDynamicRow(rowLabel, rowData);
+		}
+		
+		/**
+		 * Add a row showing all authors as a semi-colon separated list
+		 */
+		addFullAuthorListRow() {
+			// Create the row label
+			var rowLabel = document.createElement('div');
+			rowLabel.className = "meta-label";
+			rowLabel.setAttribute('fieldname', 'author-list');
+			
+			let label = this.createLabelElement({
+				text: "Authors List",
+				id: 'itembox-field-author-list-label',
+			});
+			rowLabel.appendChild(label);
+			
+			// Create the row data with the authors list
+			var rowData = document.createElement('div');
+			rowData.className = "meta-data";
+			
+			// Get all creators
+			var creators = this.item.getCreators();
+			var authorNames = [];
+			
+			// Collect full names of all creators
+			for (let creator of creators) {
+				let fullName = '';
+				
+				// For single field (fieldMode = 1), use lastName as the full name
+				if (creator.fieldMode == 1) {
+					fullName = creator.lastName;
+				}
+				// For two fields (fieldMode = 0), combine firstName and lastName
+				else {
+					if (creator.firstName && creator.lastName) {
+						fullName = creator.firstName + ' ' + creator.lastName;
+					}
+					else if (creator.lastName) {
+						fullName = creator.lastName;
+					}
+					else if (creator.firstName) {
+						fullName = creator.firstName;
+					}
+				}
+				
+				if (fullName) {
+					authorNames.push(fullName);
+				}
+			}
+			
+			// Create the value element for the full author list
+			var valueElement = this.createValueElement({
+				text: authorNames.join('; '),
+				id: 'itembox-field-author-list-value',
+				attributes: { 'aria-labelledby': label.id },
+				classList: ['author-list-value'],
+				editable: false
+			});
+			
+			rowData.appendChild(valueElement);
+			
+			// Add the row before the first creator row
 			this.addDynamicRow(rowLabel, rowData);
 		}
 		
