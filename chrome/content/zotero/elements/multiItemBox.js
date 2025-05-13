@@ -292,7 +292,7 @@
       
       // Add each citation
       for (let item of this.items) {
-        const citation = IndigoBook.generateCitation(item);
+        const citation = Zotero.IndigoBook.generateCitation(item);
         newCitation.innerHTML += `${citation}; `;
       }
       

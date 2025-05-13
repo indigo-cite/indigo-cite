@@ -5,15 +5,15 @@
 
 "use strict";
 
+// Export for usage in Zotero object
 var IndigoBook = (function(){
-  var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-  Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook/rules.js", this);
-
+  // Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook/rules.js", this);
+  const rules = Zotero.IndigoBookRules;
   const ZoteroTypeToIndigoBookRule = {
-    "journalArticle": IndigoBookRules.rule30,
-    "conferencePaper": IndigoBookRules.rule30,
-    "magazineArticle": IndigoBookRules.rule30,
-    "newspaperArticle": IndigoBookRules.rule30,
+    "journalArticle": rules.rule30,
+    "conferencePaper": rules.rule30,
+    "magazineArticle": rules.rule30,
+    "newspaperArticle": rules.rule30,
     // Add more mappings as needed
   };
 
@@ -23,12 +23,11 @@ var IndigoBook = (function(){
       if (iBookRule) {
         return iBookRule;
       }
-      console.log("no iBook rule for:", Zotero.ItemTypes.getName(item.getType()));
+      console.log("no iBook rule for:", itemTypeName);
       return null;
     },
 
     generateCitation: function(item) {
-      console.log(item);
       const iBookRule = ZoteroTypeToIndigoBookRule[Zotero.ItemTypes.getName(item.getType())];
       if (iBookRule) {
         return iBookRule.generateCitation(item);

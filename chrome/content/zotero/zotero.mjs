@@ -246,6 +246,17 @@ function makeZoteroContext() {
 	zContext.Zotero.CiteProc = {"Zotero":zContext.Zotero};
 	subscriptLoader.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", zContext.Zotero.CiteProc, 'utf-8');
 	
+	// Load IndigoBook into Zotero.IndigoBook namespace
+	try {
+		subscriptLoader.loadSubScript("chrome://zotero/content/legal_util/indigobook/rules.js", zContext);
+		zContext.Zotero.IndigoBookRules = zContext.IndigoBookRules;
+		subscriptLoader.loadSubScript("chrome://zotero/content/legal_util/indigobook.js", zContext);
+		zContext.Zotero.IndigoBook = zContext.IndigoBook;
+	}
+	catch (e) {
+		Components.utils.reportError("Error loading IndigoBook: " + e);
+	}
+	
 	// Load XRegExp object into Zotero.XRegExp
 	const xregexpFiles = [
 		/**Core functions**/

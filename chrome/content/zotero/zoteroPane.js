@@ -1641,7 +1641,6 @@ var ZoteroPane = new function()
 	};
 
 	this.initItemsTree = async function () {
-    Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook.js", this);
 		try {
 			const ItemTree = require('zotero/itemTree');
 			var itemsTree = document.getElementById('zotero-items-tree');
@@ -1656,7 +1655,7 @@ var ZoteroPane = new function()
 				emptyMessage: Zotero.getString('pane.items.loading'),
 				getExtraField: (item, field) => {
 					if (field === "indigoCite") {
-            const citation = IndigoBook.generatePlaintextCitation(item);
+            const citation = Zotero.IndigoBook.generatePlaintextCitation(item);
             return citation;
 					}
 					return undefined;

@@ -70,10 +70,7 @@
 			this._item = item;
 		}
 
-		init() {
-			// Load IndigoBook citation functionality
-			Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook.js", window);
-
+		init() {			
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
 			this._prefsObserverIDs = [
 				Zotero.Prefs.registerObserver('itemPaneHeader', () => {
@@ -224,7 +221,7 @@
 
 			// Check if we should use IndigoBook
 			if (Zotero.Prefs.get('itemPaneHeader.useIndigoBook') === true &&
-				typeof IndigoBook !== 'undefined' &&
+				typeof Zotero.IndigoBook !== 'undefined' &&
 				!this._item.isAttachment() &&
 				!this._item.isNote()) {
 
@@ -318,7 +315,7 @@
 			// Generate the IndigoBook citation
 			this.indigoCitation.hidden = false;
       const wrapper = document.createElement('span');
-      wrapper.innerHTML = IndigoBook.generateCitation(this._item);
+      wrapper.innerHTML = Zotero.IndigoBook.generateCitation(this._item);
 
       this.indigoCitation.innerHTML = '';
       this.indigoCitation.appendChild(wrapper);

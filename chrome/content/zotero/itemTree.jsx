@@ -3456,6 +3456,15 @@ var ItemTree = class ItemTree extends LibraryTree {
               val = '';
             }
           }
+          break;
+        case 'publicationTitle':
+        case 'proceedingsTitle':
+          try {
+            val = Zotero.IndigoBookRules?.rule30?.abbreviateJournalTitle(val) || val;
+          } catch (e) {
+            console.error(e);
+          }
+          break;
       }
       row[key] = val;
     }
