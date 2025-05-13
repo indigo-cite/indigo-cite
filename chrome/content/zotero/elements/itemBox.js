@@ -1405,9 +1405,34 @@
 			var valueElement = this.createValueElement({
 				text: authorNames.join('; '),
 				id: 'itembox-field-author-list-value',
-				attributes: { 'aria-labelledby': label.id },
+				attributes: { 
+					'aria-labelledby': label.id,
+					'fieldname': 'author-list'
+				},
 				classList: ['author-list-value'],
-				editable: false
+				editable: true
+			});
+			
+			// Add paste event handling to the author list field
+			valueElement.addEventListener('paste', (event) => {
+				// Handle paste events to properly format pasted content
+				// We'll process the paste after it happens
+				setTimeout(() => {
+					// Get the current value
+					let value = valueElement.value;
+					
+					// Replace all commas with semicolons
+					value = value.replace(/,/g, ';');
+					
+					// Normalize multiple semicolons to a single one
+					value = value.replace(/;+/g, ';');
+					
+					// Clean up spaces around semicolons
+					value = value.replace(/\s*;\s*/g, '; ');
+					
+					// Update the value
+					valueElement.value = value;
+				}, 0);
 			});
 			
 			rowData.appendChild(valueElement);
@@ -2195,8 +2220,44 @@
 			
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			
+			// Author list field
+			if (fieldName == 'author-list') {
+				// Parse the semicolon or comma-separated list
+				// First replace all commas with semicolons, then split by semicolon
+				let normalizedValue = value.replace(/,/g, ';');
+				let authorNames = normalizedValue.split(';').map(name => name.trim()).filter(name => name);
+				
+				if (authorNames.length > 0) {
+					const creators = authorNames.map(authorName => {
+						let nameParts = authorName.split(' ');
+						
+						if (nameParts.length > 1) {
+							const lastName = nameParts.pop();
+							const firstName = nameParts.join(' ');
+							
+							return {
+								firstName,
+								lastName,
+								creatorType: 'author',
+								fieldMode: 0
+							};
+						}
+						else {
+							return {
+								lastName: authorName,
+								creatorType: 'author',
+								fieldMode: 1
+							};
+						}
+					});					
+					this.item.setCreators(creators);
+          this.item.saveTx();
+					this.refresh();
+				}
+				return;
+			}
 			// Creator fields
-			if (field == 'creator') {
+			else if (field == 'creator') {
 				var row = textbox.closest('.meta-row');
 				
 				var otherFields = this.getCreatorFields(row);
