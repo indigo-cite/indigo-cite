@@ -69,14 +69,15 @@ const COLUMNS = [
   {
     dataKey: "indigoCite",
     showInColumnPicker: true,
-    label: "IndigoBook Citation",
+    label: "Citation",
     flex: 3,
     zoteroPersist: ["width", "hidden", "sortDirection"]
   },
   {
     dataKey: "firstCreator",
     defaultIn: ["default", "feeds", "feed"],
-    label: "zotero.items.creator_column",
+    // label: "zotero.items.creator_column",
+    label: "Author",
     showInColumnPicker: true,
     flex: 1,
     zoteroPersist: ["width", "hidden", "sortDirection"]
