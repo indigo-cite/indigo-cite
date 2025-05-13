@@ -38,19 +38,22 @@
 				<duplicates-merge-pane id="zotero-duplicates-merge-pane" />
 
 				<annotation-items-pane id="zotero-annotations-pane" />
+
+        <multi-info-box id="zotero-multi-item-pane" />
 			</deck>
 			<item-pane-sidenav id="zotero-view-item-sidenav" class="zotero-view-item-sidenav"/>
 		`);
 
 		init() {
 			this._itemDetails = this.querySelector("#zotero-item-details");
+      this._multiItemView = this.querySelector("#zotero-multi-item-pane");
 			this._noteEditor = this.querySelector("#zotero-note-editor");
 			this._duplicatesPane = this.querySelector("#zotero-duplicates-merge-pane");
 			this._messagePane = this.querySelector("#zotero-item-message");
 			this._annotationsPane = this.querySelector("#zotero-annotations-pane");
 			this._sidenav = this.querySelector("#zotero-view-item-sidenav");
 			this._deck = this.querySelector("#zotero-item-pane-content");
-
+      console.log(this);
 			this._itemDetails.sidenav = this._sidenav;
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
@@ -96,7 +99,7 @@
 		}
 
 		get mode() {
-			return ["message", "item", "note", "duplicates"][this._deck.selectedIndex];
+			return ["message", "item", "note", "duplicates", "annotations", "multi_item"][this._deck.selectedIndex];
 		}
 
 		/**
@@ -131,7 +134,11 @@
 					renderStatus = this.renderItemPane(item);
 				}
 			}
-			// Zero or multiple items selected
+			// Multiple items selected
+      else if (this.data.length > 1) {
+        renderStatus = this.renderMultiItemPane(this.data);
+      }
+			// Zero items selected
 			else {
 				renderStatus = this.renderMessage();
 			}
@@ -213,6 +220,77 @@
 			}
 			return true;
 		}
+
+		async renderMultiItemPane(items) {
+			let previousMode = this.mode;
+			this.mode = "multi_item";
+
+			let msg;
+			
+			// Fix https://forums.zotero.org/discussion/115450/zotero-7-beta-wrong-vertical-position-in-the-item-pane-after-switching-from-a-note
+			if (previousMode === "note") {
+				// Wait for DOM to update and then trigger item-details render
+				await new Promise((resolve) => {
+					requestIdleCallback(resolve, { timeout: 50 });
+				});
+			}
+			// Display duplicates merge interface in item pane
+			if (this.collectionTreeRow.isDuplicates()) {
+				if (!this.editable) {
+          msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
+					this.setItemPaneMessage(msg);
+				}	else {
+					this.mode = "duplicates";
+					
+					// On a Select All of more than a few items, display a row
+					// count instead of the usual item type mismatch error
+					let displayNumItemsOnTypeError = count > 5 && count == this.itemsView.rowCount;
+					
+					// Initialize the merge pane with the selected items
+					this._duplicatesPane.setItems(this.data, displayNumItemsOnTypeError);
+				}
+			} else {
+				let key;
+        // In the trash, we have to check the object type
+        if (this.collectionTreeRow.isTrash()) {
+          if (this.data.every(x => x instanceof Zotero.Collection)) {
+            key = 'item-pane-message-collections-selected';
+          }
+          else if (this.data.every(x => x instanceof Zotero.Search)) {
+            key = 'item-pane-message-searches-selected';
+          }
+          else if (this.data.every(x => x instanceof Zotero.Item)) {
+            key = 'item-pane-message-items-selected';
+          }
+          else {
+            key = 'item-pane-message-objects-selected';
+          }
+          msg = { l10nId: key, l10nArgs: { count } };
+          this.setItemPaneMessage(msg);
+        }
+        else {
+  				console.log('multiple items:', items);
+          return this.renderMultiItemEditView(items);
+        }
+				return false;
+			}
+			return true;
+		}
+    async renderMultiItemEditView(items) {		
+			if (this.getAttribute("collapsed") == "true") {
+				return true;
+			}
+			this._multiItemView.editable = this.editable;
+			this._multiItemView.tabID = "zotero-pane";
+			this._multiItemView.tabType = "library";
+			this._multiItemView.items = items;
+
+      console.log(this._multiItemView);
+      this._multiItemView.render();
+      // TODO: render a copiable list of semicolon-separated indigobook citations
+      // TODO: render a mass-edit view pane of the selected items. The view panem should support adding or removing tags, chaning the item type, or performing one of a set of operations on all selected items (e.g., convert title to Title Case, etc.)
+			return true;
+    }
 
 		renderMessage() {
 			let msg;
@@ -541,7 +619,11 @@
 					mode = "note";
 				}
 				else {
-					mode = "item";
+          if (this.data.length > 1) {
+            mode = "multi_item";
+          } else {
+            mode = "item";
+          }
 				}
 			}
 			let map = {
@@ -549,7 +631,8 @@
 				item: "_itemDetails",
 				note: "_noteEditor",
 				duplicates: "_duplicatesPane",
-				annotations: "_annotationsPane"
+				annotations: "_annotationsPane",
+        multi_item: "_multiItemView",
 			};
 			return this[map[mode]];
 		}
@@ -632,6 +715,10 @@
 					this._deck.selectedIndex = 4;
 					break;
 				}
+        case "multi_item": {
+          this._deck.selectedIndex = 5;
+          break;
+        }
 			}
 			let isViewingItem = type == "item";
 			if (previousViewType != "item" && isViewingItem) {

@@ -453,9 +453,17 @@
 			// Get field order from database
 			else {
 				var fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
+        const itemTypeName = Zotero.ItemTypes.getName(this.item.getType());
+        const indigoRule = ZoteroTypeToIndigoBookRule[itemTypeName];
+        const indigoFields = indigoRule?.getFields() || fields;
 				
 				for (let i = 0; i < fields.length; i++) {
-					fieldNames.push(Zotero.ItemFields.getName(fields[i]));
+          const fieldName = Zotero.ItemFields.getName(fields[i]);
+          if (indigoFields.indexOf(fieldName) !== -1) {
+  					fieldNames.push(fieldName);
+          } else {
+            console.log(`Field ${fieldName} not found in IndigoBook rule for ${itemTypeName}`);
+          }
 				}
 
 				if (this.item instanceof Zotero.FeedItem) {

@@ -29,16 +29,19 @@ var IndigoBookRules = (function (){
       // Citations to consecutively paginated journals (that is, journals in which page numbering is continued from the last issue) take the following form:
       // <Author’s Name(s)>, <Designation of piece> <Italicized Title of the Article>, <volume number, if applicable> <Name of Publication, abbreviated> <page number of first page of article cited>, <pincite, if citing to specific point> <(year published)>.
       // Follow Rule R30.2 below for author name rules and Rule R30.3 for abbreviating the name of the publication.
-      usedFields: [
-        'title',
-        'publicationTitle',
-        'proceedingsTitle',
-        'volume',
-        'pages',
-        'year',
-        'url',
-        'accessDate',
-      ],
+      getFields: function(){
+        return [
+          'title',
+          'publicationTitle',
+          'proceedingsTitle',
+          'volume',
+          'pages',
+          'year',
+          'date',
+          'url',
+          'accessDate',
+        ];
+      },
       generateCitation: function(item) {
         let citation = '';
 
