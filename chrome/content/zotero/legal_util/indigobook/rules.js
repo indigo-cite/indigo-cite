@@ -4,9 +4,10 @@
  */
 
 "use strict";
-Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook/tables.js", window);
 
 var IndigoBookRules = (function (){
+  Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook/tables.js", this);
+
   function _quick_escape(str) {
     const temp = document.createElement('div');
     temp.textContent = str;
@@ -90,7 +91,6 @@ var IndigoBookRules = (function (){
         if (url) {
           citation += `, ${_quick_escape(url)}`;
         }
-        console.log('Citation:', citation);
         return citation.trim();
       },
       // 30.2 authors

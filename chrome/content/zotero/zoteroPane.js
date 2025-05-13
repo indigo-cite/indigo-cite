@@ -1641,6 +1641,7 @@ var ZoteroPane = new function()
 	};
 
 	this.initItemsTree = async function () {
+    Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook.js", this);
 		try {
 			const ItemTree = require('zotero/itemTree');
 			var itemsTree = document.getElementById('zotero-items-tree');
@@ -1652,7 +1653,14 @@ var ZoteroPane = new function()
 				onSelectionChange: selection => ZoteroPane.itemSelected(selection),
 				onContextMenu: (...args) => ZoteroPane.onItemsContextMenuOpen(...args),
 				onActivate: (event, items) => ZoteroPane.onItemTreeActivate(event, items),
-				emptyMessage: Zotero.getString('pane.items.loading')
+				emptyMessage: Zotero.getString('pane.items.loading'),
+				getExtraField: (item, field) => {
+					if (field === "indigoCite") {
+            const citation = IndigoBook.generatePlaintextCitation(item);
+            return citation;
+					}
+					return undefined;
+				}
 			});
 			ZoteroPane.itemsView.onRefresh.addListener(() => ZoteroPane.setTagScope());
 			ZoteroPane.itemsView.waitForLoad().then(() => Zotero.uiIsReady());

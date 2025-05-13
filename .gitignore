@@ -5,3 +5,5 @@ build/
 tmp
 app/win/codesign
 CLAUDE.md
+
+**/.claude/settings.local.json

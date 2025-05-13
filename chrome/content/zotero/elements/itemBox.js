@@ -35,6 +35,7 @@
 		"bidi.browser.ui",
 		false
 	);
+  Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook.js", this);
 
 	class InfoBox extends ItemPaneSectionElementBase {
 		constructor() {
@@ -454,7 +455,7 @@
 			else {
 				var fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
         const itemTypeName = Zotero.ItemTypes.getName(this.item.getType());
-        const indigoRule = ZoteroTypeToIndigoBookRule[itemTypeName];
+        const indigoRule = IndigoBook.getRule(itemTypeName);
         const indigoFields = indigoRule?.getFields() || fields;
 				
 				for (let i = 0; i < fields.length; i++) {
@@ -462,7 +463,7 @@
           if (indigoFields.indexOf(fieldName) !== -1) {
   					fieldNames.push(fieldName);
           } else {
-            console.log(`Field ${fieldName} not found in IndigoBook rule for ${itemTypeName}`);
+            // console.log(`Field ${fieldName} not found in IndigoBook rule for ${itemTypeName}`);
           }
 				}
 
