@@ -72,7 +72,18 @@ var IndigoBookRules = (function (){
         //year of publication
         const year = item.getField('year');
         if (year) {
-          citation += `(${_quick_escape(year)})`;
+          // Get current year
+          const currentYear = new Date().getFullYear();
+          const yearNumber = parseInt(year);
+          
+          // Check if year is a valid number and in the future
+          if (!isNaN(yearNumber) && yearNumber > currentYear) {
+            citation += `(forthcoming ${_quick_escape(year)})`;
+          } else {
+            citation += `(${_quick_escape(year)})`;
+          }
+        } else {
+          citation += "(_)"
         }
         //url
         const url = item.getField('url').split("#")[0];

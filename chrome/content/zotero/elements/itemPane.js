@@ -53,7 +53,6 @@
 			this._annotationsPane = this.querySelector("#zotero-annotations-pane");
 			this._sidenav = this.querySelector("#zotero-view-item-sidenav");
 			this._deck = this.querySelector("#zotero-item-pane-content");
-      console.log(this);
 			this._itemDetails.sidenav = this._sidenav;
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
@@ -285,9 +284,7 @@
 			this._multiItemView.tabType = "library";
 			this._multiItemView.items = items;
 
-      console.log(this._multiItemView);
       this._multiItemView.render();
-      // TODO: render a copiable list of semicolon-separated indigobook citations
       // TODO: render a mass-edit view pane of the selected items. The view panem should support adding or removing tags, chaning the item type, or performing one of a set of operations on all selected items (e.g., convert title to Title Case, etc.)
 			return true;
     }
