@@ -1,3 +1,9 @@
+// default number of authors before "et al"
+pref("extentions.zotero.indigoBook.maxAuthors", 5)
+// show indigobook citation as header in item detail panem
+pref("extentions.zotero.itemPaneHeader.useIndigoBook", true)
+
+
 // We only want a single window, I think
 pref("toolkit.singletonWindowType", "navigator:browser");
 
@@ -163,6 +169,7 @@ pref("media.utility-ffvpx.enabled", false);
 // Allow collectionTree scrolling when Control is highlighting collections on win
 pref("mousewheel.with_control.action", 1);
 
+// add debug stuff.
 pref("devtools.debugger.remote-enabled", true);
 pref("devtools.toolbox.host", "window"); // or "bottom"
 pref("devtools.browsertoolbox.panel", "inspector");
