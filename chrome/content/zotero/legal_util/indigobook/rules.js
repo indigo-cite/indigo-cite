@@ -113,11 +113,11 @@ var IndigoBookRules = (function (){
       //R30.2.3 Multiple authors - For more than two authors, all authors may be listed with an ampersand before the last name; or all but the first may be omitted and replaced by “et al.” Indicate all authors when relevant the point being made, or when recognition of all authors is desirable.
       // STEIN MODIFICATION: if set, include the first {indigoBook.maxAuthors} authors.
       const maxAuthors = Zotero.Prefs.get('indigoBook.maxAuthors');
-      if (maxAuthors && maxAuthors > 0 && authors.length > maxAuthors) {
-        const numAuthors = Math.min(maxAuthors, authors.length);
-        return `${authorNames.slice(0, numAuthors-1).join(', ')} & ${authorNames[numAuthors-1]} et al.`;
+      const numAuthors = Math.min(maxAuthors, authors.length);
+      if (numAuthors && numAuthors > 0 && authors.length > maxAuthors) {
+        return `${authorNames.slice(0, numAuthors).join(', ')} et al.`;
       } else if (maxAuthors){
-        return authorNames.join(', ');
+        return `${authorNames.slice(0, numAuthors-1).join(', ')} & ${authorNames[numAuthors-1]}`;
       } else {
         return `${authorNames[0]} et al.`;  
       }
