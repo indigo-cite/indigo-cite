@@ -114,7 +114,8 @@ var IndigoBookRules = (function (){
       // STEIN MODIFICATION: if set, include the first {indigoBook.maxAuthors} authors.
       const maxAuthors = Zotero.Prefs.get('indigoBook.maxAuthors');
       if (maxAuthors && maxAuthors > 0 && authors.length > maxAuthors) {
-        return `${authorNames.slice(0, maxAuthors).join(', ')}, et al.`;
+        const numAuthors = Math.min(maxAuthors, authors.length);
+        return `${authorNames.slice(0, numAuthors-1).join(', ')} & ${authorNames[maxAuthors-1]} et al.`;
       } else if (maxAuthors){
         return authorNames.join(', ');
       } else {
@@ -163,6 +164,18 @@ var IndigoBookRules = (function (){
     * Citations to Internet sources follow this form: <Author Name>, <Title of Website Page>, <italicized Main Website Title>, <pincite> <(Date source posted, with exact time of posting if available)>, <URL>.
     */
   const rule33 = {
+    getFields: function(){
+      return [
+        'creator',
+        'publicationTitle',
+        'websiteTitle',
+        'blogTitle',
+        'title',
+        'date',
+        'url',
+        'accessDate',
+      ];
+    },
     formatDate: function(date) {
       const monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
       const zdate = Zotero.Date.strToDate(date);

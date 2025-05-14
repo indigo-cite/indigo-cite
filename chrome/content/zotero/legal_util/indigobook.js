@@ -14,6 +14,7 @@ var IndigoBook = (function(){
     "conferencePaper": rules.rule30,
     "magazineArticle": rules.rule30,
     "newspaperArticle": rules.rule30,
+    "preprint": rules.rule30,
     // Add more mappings as needed
   };
 
