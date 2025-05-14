@@ -115,7 +115,7 @@ var IndigoBookRules = (function (){
       const maxAuthors = Zotero.Prefs.get('indigoBook.maxAuthors');
       if (maxAuthors && maxAuthors > 0 && authors.length > maxAuthors) {
         const numAuthors = Math.min(maxAuthors, authors.length);
-        return `${authorNames.slice(0, numAuthors-1).join(', ')} & ${authorNames[maxAuthors-1]} et al.`;
+        return `${authorNames.slice(0, numAuthors-1).join(', ')} & ${authorNames[numAuthors-1]} et al.`;
       } else if (maxAuthors){
         return authorNames.join(', ');
       } else {
