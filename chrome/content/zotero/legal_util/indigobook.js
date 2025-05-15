@@ -19,6 +19,9 @@ var IndigoBook = (function(){
   };
 
   return {
+    getZoteroTypeList: function() {
+      return Array.from(Object.keys(ZoteroTypeToIndigoBookRule));
+    },
     getRule: function(itemTypeName) {
       const iBookRule = ZoteroTypeToIndigoBookRule[itemTypeName];
       if (iBookRule) {
