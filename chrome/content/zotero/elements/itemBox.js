@@ -456,10 +456,10 @@
         const itemTypeName = Zotero.ItemTypes.getName(this.item.getType());
         const indigoRule = Zotero.IndigoBook.getRule(itemTypeName);
         const indigoFields = indigoRule?.getFields() || fields;
-				
+        
 				for (let i = 0; i < fields.length; i++) {
           const fieldName = Zotero.ItemFields.getName(fields[i]);
-          if (indigoFields.indexOf(fieldName) !== -1) {
+          if (indigoFields.indexOf(fieldName) !== -1 || indigoFields.length === 0) {
   					fieldNames.push(fieldName);
           } else {
             // console.log(`Field ${fieldName} not found in Zotero.IndigoBook rule for ${itemTypeName}`);

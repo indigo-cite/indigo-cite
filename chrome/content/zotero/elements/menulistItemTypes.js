@@ -66,21 +66,19 @@
 			if (Zotero.IndigoBook && typeof Zotero.IndigoBook.getZoteroTypeList === 'function') {
 				indigoTypes = Zotero.IndigoBook.getZoteroTypeList();
 			}
-			
-			for (let i = 0; i < itemTypes.length; i++) {
-				if (indigoTypes.includes(itemTypes[i].name)) {
-					itemTypes[i].isIndigoType = true;
-				}
-			}
+			if (indigoTypes.length !== 0) {
+        for (let i = 0; i < itemTypes.length; i++) {
+          if (indigoTypes.includes(itemTypes[i].name)) {
+            itemTypes[i].isIndigoType = true;
+          }
+        }
+      }
 			
 			// Sort with Indigo types first, then alphabetically within each group
 			var collation = Zotero.getLocaleCollation();
 			itemTypes.sort((a, b) => {
-				// First sort by whether it's an Indigo Book type or not
 				if (a.isIndigoType && !b.isIndigoType) return -1;
 				if (!a.isIndigoType && b.isIndigoType) return 1;
-				
-				// Then sort alphabetically within each group
 				return collation.compareString(1, a.localized, b.localized);
 			});
 			
@@ -88,7 +86,6 @@
 				let name = itemTypes[i].name;
 				if (name != 'attachment' && name != 'note' && name != 'annotation') {
 					let item = this.appendItem(itemTypes[i].localized, itemTypes[i].id);
-					// Apply italics to non-Indigo Book types
 					if (!itemTypes[i].isIndigoType) {
 						item.style.fontStyle = 'italic';
 					}

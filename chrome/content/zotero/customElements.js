@@ -42,6 +42,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['guidance-panel', 'chrome://zotero/content/elements/guidancePanel.js'],
 		// TODO: rename itemBox.js to infoBox.js later to avoid conflict
 		['info-box', 'chrome://zotero/content/elements/itemBox.js'],
+		['bulk-editor-box', 'chrome://zotero/content/elements/bulkEditorBox.js'],
 		['multi-info-box', 'chrome://zotero/content/elements/multiItemBox.js'],
 		['item-details', 'chrome://zotero/content/elements/itemDetails.js'],
 		['item-pane', 'chrome://zotero/content/elements/itemPane.js'],

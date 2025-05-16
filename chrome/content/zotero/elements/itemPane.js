@@ -46,7 +46,7 @@
 
 		init() {
 			this._itemDetails = this.querySelector("#zotero-item-details");
-      this._multiItemView = this.querySelector("#zotero-multi-item-pane");
+      this._multiItemPane = this.querySelector("#zotero-multi-item-pane");
 			this._noteEditor = this.querySelector("#zotero-note-editor");
 			this._duplicatesPane = this.querySelector("#zotero-duplicates-merge-pane");
 			this._messagePane = this.querySelector("#zotero-item-message");
@@ -135,6 +135,7 @@
 			}
 			// Multiple items selected
       else if (this.data.length > 1) {
+        hideSidenav = true;
         renderStatus = this.renderMultiItemPane(this.data);
       }
 			// Zero items selected
@@ -279,12 +280,12 @@
 			if (this.getAttribute("collapsed") == "true") {
 				return true;
 			}
-			this._multiItemView.editable = this.editable;
-			this._multiItemView.tabID = "zotero-pane";
-			this._multiItemView.tabType = "library";
-			this._multiItemView.items = items;
+			this._multiItemPane.editable = this.editable;
+			// this._multiItemPane.tabID = "zotero-pane";
+			// this._multiItemPane.tabType = "library";
+			this._multiItemPane.items = items;
 
-      this._multiItemView.render();
+      this._multiItemPane.render();
       // TODO: render a mass-edit view pane of the selected items. The view panem should support adding or removing tags, chaning the item type, or performing one of a set of operations on all selected items (e.g., convert title to Title Case, etc.)
 			return true;
     }
@@ -629,7 +630,7 @@
 				note: "_noteEditor",
 				duplicates: "_duplicatesPane",
 				annotations: "_annotationsPane",
-        multi_item: "_multiItemView",
+        multi_item: "_multiItemPane",
 			};
 			return this[map[mode]];
 		}
