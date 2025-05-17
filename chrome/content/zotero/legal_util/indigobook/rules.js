@@ -54,7 +54,7 @@ var IndigoBookRules = (function (){
       const journalTitle = item.getField('publicationTitle');
       if (!journalTitle) {
         const proceedingsTitle = item.getField("proceedingsTitle");
-        if (proceedingsTitle.match(/^(?:Proceedings of the|Proceedings)/i)) {
+        if (proceedingsTitle.match(/^(?:Proceedings)/i)) {
           journalTitle = proceedingsTitle;
         } else {
           journalTitle = `Proceedings of ${proceedingsTitle}`;
