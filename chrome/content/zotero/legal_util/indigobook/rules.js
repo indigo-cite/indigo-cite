@@ -51,7 +51,15 @@ var IndigoBookRules = (function (){
       }
       const articleTitle = item.getField('title');
       citation += `<i>${_quick_escape(articleTitle)}</i>, `;
-      const journalTitle = item.getField('publicationTitle') || item.getField("proceedingsTitle");
+      const journalTitle = item.getField('publicationTitle');
+      if (!journalTitle) {
+        const proceedingsTitle = item.getField("proceedingsTitle");
+        if (proceedingsTitle.match(/^(?:Proceedings of the|Proceedings)/i)) {
+          journalTitle = proceedingsTitle;
+        } else {
+          journalTitle = `Proceedings of ${proceedingsTitle}`;
+        }
+      }
       const journalName = IndigoBookRules.rule30.abbreviateJournalTitle(journalTitle);
       const volume = item.getField('volume');
       //page number of first page of article cited. E.g., 123-145 is "123"
