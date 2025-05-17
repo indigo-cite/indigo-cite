@@ -455,8 +455,8 @@
 				var fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
         const itemTypeName = Zotero.ItemTypes.getName(this.item.getType());
         const indigoRule = Zotero.IndigoBook.getRule(itemTypeName);
-        const indigoFields = indigoRule?.getFields() || fields;
-        
+        const indigoFields = indigoRule?.getFields() || fields.map(Zotero.ItemFields.getName);
+
 				for (let i = 0; i < fields.length; i++) {
           const fieldName = Zotero.ItemFields.getName(fields[i]);
           if (indigoFields.indexOf(fieldName) !== -1 || indigoFields.length === 0) {
@@ -715,9 +715,10 @@
 			
 			// Add the full author list if we have creators
 			if (num > 0) {
-				this.addFullAuthorListRow();
+				this.addFullAuthorListRow(this._firstRowBeforeCreators);
 			}
 			
+      if (false) {
 			if (num > 0) {
 				// Limit number of creators display
 				var max = Math.min(num, this._initialVisibleCreators);
@@ -769,7 +770,7 @@
 				});
 				this._showCreatorTypeGuidance = false;
 			}
-
+      }
 			this._ensureButtonsFocusable();
 			this._updateCreatorButtonsStatus();
 
@@ -1355,23 +1356,18 @@
 		/**
 		 * Add a row showing all authors as a semi-colon separated list
 		 */
-		addFullAuthorListRow() {
-			// Create the row label
+		addFullAuthorListRow(before) {
 			var rowLabel = document.createElement('div');
 			rowLabel.className = "meta-label";
 			rowLabel.setAttribute('fieldname', 'author-list');
 			
 			let label = this.createLabelElement({
-				text: "Authors List",
+				text: "Authors",
 				id: 'itembox-field-author-list-label',
 			});
 			rowLabel.appendChild(label);
-			
-			// Create the row data with the authors list
 			var rowData = document.createElement('div');
 			rowData.className = "meta-data";
-			
-			// Get all creators
 			var creators = this.item.getCreators();
 			var authorNames = [];
 			
@@ -1401,7 +1397,6 @@
 				}
 			}
 			
-			// Create the value element for the full author list
 			var valueElement = this.createValueElement({
 				text: authorNames.join('; '),
 				id: 'itembox-field-author-list-value',
@@ -1413,32 +1408,22 @@
 				editable: true
 			});
 			
-			// Add paste event handling to the author list field
 			valueElement.addEventListener('paste', (event) => {
 				// Handle paste events to properly format pasted content
 				// We'll process the paste after it happens
 				setTimeout(() => {
-					// Get the current value
 					let value = valueElement.value;
-					
-					// Replace all commas with semicolons
 					value = value.replace(/,/g, ';');
-					
-					// Normalize multiple semicolons to a single one
 					value = value.replace(/;+/g, ';');
-					
 					// Clean up spaces around semicolons
 					value = value.replace(/\s*;\s*/g, '; ');
-					
-					// Update the value
 					valueElement.value = value;
 				}, 0);
 			});
 			
 			rowData.appendChild(valueElement);
 			
-			// Add the row before the first creator row
-			this.addDynamicRow(rowLabel, rowData);
+			this.addDynamicRow(rowLabel, rowData, before);
 		}
 		
 		addDateRow(field, value) {
