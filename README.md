@@ -1,5 +1,10 @@
-Zotero
+![Icon1024](https://github.com/user-attachments/assets/6edda8c9-efd4-4678-b980-bfc6b623fa1d)
+
+Indigo-Cite
 ======
+
+Indigo-Cite is a fork of Zotero specifically for legal academic writing. It is currently under development.
+
 [![CI](https://github.com/zotero/zotero/actions/workflows/ci.yml/badge.svg)](https://github.com/zotero/zotero/actions/workflows/ci.yml)
 
 [Zotero](https://www.zotero.org/) is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.
