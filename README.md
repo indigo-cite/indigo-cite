@@ -1,4 +1,4 @@
-![Icon1024](https://github.com/user-attachments/assets/6edda8c9-efd4-4678-b980-bfc6b623fa1d)
+<img src="https://github.com/user-attachments/assets/6edda8c9-efd4-4678-b980-bfc6b623fa1d" width="100" height="100" />
 
 Indigo-Cite
 ======
