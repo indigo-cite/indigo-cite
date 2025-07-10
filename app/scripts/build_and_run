@@ -91,4 +91,6 @@ else
 	exit 1
 fi
 
-"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -ZoteroDebugText -purgecaches $PARAMS "$@"
+echo "Launching: $APP_ROOT_DIR/staging/$command ${profile_args[*]} -ZoteroDebugText -purgecaches $PARAMS $*"
+
+"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -ZoteroDebugText -purgecaches $PARAMS "$@" > /dev/null

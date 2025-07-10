@@ -1,4 +1,4 @@
-var IndigoBookRules = (function (){
+var IndigoBookRules = (function () {
   Services.scriptloader.loadSubScript("chrome://zotero/content/legal_util/indigobook/tables.js", this);
 
   function _quick_escape(str) {
@@ -12,7 +12,7 @@ var IndigoBookRules = (function (){
   }
 
   function _titleCase(str) {
-    return str.toLowerCase().split(' ').map(function(word) {
+    return str.toLowerCase().split(' ').map(function (word) {
       return word.charAt(0).toUpperCase() + word.slice(1);
     }).join(' ');
   }
@@ -25,7 +25,7 @@ var IndigoBookRules = (function (){
     // Citations to consecutively paginated journals (that is, journals in which page numbering is continued from the last issue) take the following form:
     // <Author’s Name(s)>, <Designation of piece> <Italicized Title of the Article>, <volume number, if applicable> <Name of Publication, abbreviated> <page number of first page of article cited>, <pincite, if citing to specific point> <(year published)>.
     // Follow Rule R30.2 below for author name rules and Rule R30.3 for abbreviating the name of the publication.
-    getFields: function(){
+    getFields: function () {
       return [
         'title',
         'publicationTitle',
@@ -38,7 +38,7 @@ var IndigoBookRules = (function (){
         'accessDate',
       ];
     },
-    generateCitation: function(item) {
+    generateCitation: function (item) {
       let citation = '';
 
       const authors = IndigoBookRules.rule30.getAuthors(item);
@@ -51,7 +51,7 @@ var IndigoBookRules = (function (){
       }
       const articleTitle = item.getField('title');
       citation += `<i>${_quick_escape(articleTitle)}</i>, `;
-      const journalTitle = item.getField('publicationTitle');
+      let journalTitle = item.getField('publicationTitle');
       if (!journalTitle) {
         const proceedingsTitle = item.getField("proceedingsTitle");
         if (proceedingsTitle.match(/^(?:Proceedings)/i)) {
@@ -79,7 +79,7 @@ var IndigoBookRules = (function (){
         // Get current year
         const currentYear = new Date().getFullYear();
         const yearNumber = parseInt(year);
-        
+
         // Check if year is a valid number and in the future
         if (!isNaN(yearNumber) && yearNumber > currentYear) {
           citation += `(forthcoming ${_quick_escape(year)})`;
@@ -101,7 +101,7 @@ var IndigoBookRules = (function (){
       return citation.trim();
     },
     // 30.2 authors
-    getAuthors: function(item) {
+    getAuthors: function (item) {
       const authors = item.getCreators();
       //R30.2.1 Name as listed - Show the author’s name beginning with first name, initials if indicated on the publication, and last name followed by any name suffixes (Jr., III) indicated on the publication title.
       const authorNames = authors.map(author => {
@@ -124,10 +124,10 @@ var IndigoBookRules = (function (){
       const numAuthors = Math.min(maxAuthors, authors.length);
       if (numAuthors && numAuthors > 0 && authors.length > maxAuthors) {
         return `${authorNames.slice(0, numAuthors).join(', ')} et al.`;
-      } else if (maxAuthors){
-        return `${authorNames.slice(0, numAuthors-1).join(', ')} & ${authorNames[numAuthors-1]}`;
+      } else if (maxAuthors) {
+        return `${authorNames.slice(0, numAuthors - 1).join(', ')} & ${authorNames[numAuthors - 1]}`;
       } else {
-        return `${authorNames[0]} et al.`;  
+        return `${authorNames[0]} et al.`;
       }
 
       //R30.2.4 No Author Listed - When no author is listed at the beginning or end of the publication source, skip the author field and begin the citation with the publication’s title.
@@ -136,7 +136,7 @@ var IndigoBookRules = (function (){
       }
     },
     // 30.3 Journal Titles
-    abbreviateJournalTitle: function(journalTitle) {
+    abbreviateJournalTitle: function (journalTitle) {
       //Use the abbreviations for common institutional names as listed in Table T15 if the name is listed. If the institutional name is not listed in Table T15, use abbreviations as listed in Table T11 and Table T12. If the periodical title has an abbreviation in it, use the abbreviation. If the word is not found in any of these tables, do not abbreviate the word in the abbreviated title.
       const table11 = IndigoBookTables.table11;
       const table12 = IndigoBookTables.table12;
@@ -147,7 +147,7 @@ var IndigoBookRules = (function (){
       let abbreviatedTitle = journalTitle;
       for (const table of [table15, table11, table12]) {
         for (const [key, value] of Object.entries(table)) {
-          abbreviatedTitle = abbreviatedTitle.replace(new RegExp(`\\b${key}\\b`, 'gi'), value);        
+          abbreviatedTitle = abbreviatedTitle.replace(new RegExp(`\\b${key}\\b`, 'gi'), value);
         }
       }
       // tables 
@@ -163,8 +163,8 @@ var IndigoBookRules = (function (){
       abbreviatedTitle = abbreviatedTitle.replace(/,/g, '');
       //If a periodical title has a colon followed by words, omit all that from the abbreviated title. 
       abbreviatedTitle = abbreviatedTitle.replace(/:\s*.*$/, '');
-      return abbreviatedTitle;      
-    } 
+      return abbreviatedTitle;
+    }
   };
 
   /**
@@ -172,7 +172,7 @@ var IndigoBookRules = (function (){
     * Citations to Internet sources follow this form: <Author Name>, <Title of Website Page>, <italicized Main Website Title>, <pincite> <(Date source posted, with exact time of posting if available)>, <URL>.
     */
   const rule33 = {
-    getFields: function(){
+    getFields: function () {
       return [
         'creator',
         'publicationTitle',
@@ -184,7 +184,7 @@ var IndigoBookRules = (function (){
         'accessDate',
       ];
     },
-    formatDate: function(date) {
+    formatDate: function (date) {
       const monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
       const zdate = Zotero.Date.strToDate(date);
       let dateString = '';
@@ -199,7 +199,7 @@ var IndigoBookRules = (function (){
       }
       return dateString.trim();
     },
-    generateCitation: function(item) {
+    generateCitation: function (item) {
       const publicationTitle = item.getField('publicationTitle') || item.getField('websiteTitle') || item.getField('blogTitle');
       const publicationName = rule30.abbreviateJournalTitle(publicationTitle);
       const title = item.getField('title');
